@@ -40,3 +40,18 @@ class LoginEvent extends AuthEvent {
 class LogoutEvent extends AuthEvent {}
 
 class CheckAuthStatusEvent extends AuthEvent {}
+
+class UpdateProfileEvent extends AuthEvent {
+  final String? name;
+  final String? phone;
+  final String? avatarUrl;
+
+  const UpdateProfileEvent({
+    this.name,
+    this.phone,
+    this.avatarUrl,
+  });
+
+  @override
+  List<Object?> get props => [name, phone, avatarUrl];
+}

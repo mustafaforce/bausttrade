@@ -2,17 +2,17 @@
 
 ## Features to Implement
 
-### Phase 1: Authentication
-1. **User Registration** - Email/password registration with validation
-2. **User Login** - Email/password login with session management
-3. **Logout** - End user session
+### Phase 1: Authentication ✅
+1. **User Registration** - Email/password registration with validation ✅
+2. **User Login** - Email/password login with session management ✅
+3. **Logout** - End user session ✅
 
-### Phase 2: User Management
-4. **Profile Management** - View/edit user profile
-5. **Listing Management** - View/edit/delete own listings
+### Phase 2: User Management ✅
+4. **Profile Management** - View/edit user profile, avatar upload ✅
+5. **Listing Management** - View/delete own listings ✅
 
 ### Phase 3: Product Listings
-6. **Product Posting** - Create listing (image, title, category, price, description)
+6. **Product Posting** - Create listing (image, title, category, price, description) ✅
 7. **Product Listing Browsing** - View all listings
 8. **Category-Based Filtering** - Filter by category
 9. **Search Functionality** - Search by keyword
@@ -41,23 +41,47 @@
 
 ---
 
+## Project Structure (Clean Architecture)
+```
+lib/
+├── core/
+│   ├── constants/      # Supabase config, env handling
+│   ├── theme/          # App theme
+│   └── utils/          # Logger, Failure, UseCase base
+├── features/
+│   ├── auth/           # Authentication
+│   │   ├── data/       # Models, Datasources, Repository impl
+│   │   ├── domain/     # Entities, Repository interface, UseCases
+│   │   └── presentation/  # BLoC, Pages
+│   ├── listings/       # Listings & Categories
+│   │   ├── data/
+│   │   ├── domain/
+│   │   └── presentation/
+│   └── profile/        # Profile Management
+│       ├── domain/     # UseCases
+│       └── presentation/  # Pages
+├── injection_container.dart
+└── main.dart
+```
+
+---
+
 ## Database Schema (Supabase/PostgreSQL)
 
 ### Tables
 
-#### `users`
+#### `users` ✅
 | Column | Type | Constraints |
 |--------|------|-------------|
 | id | UUID | PRIMARY KEY |
 | email | VARCHAR(255) | UNIQUE, NOT NULL |
-| password_hash | VARCHAR(255) | NOT NULL |
 | name | VARCHAR(100) | NOT NULL |
 | phone | VARCHAR(20) | |
 | avatar_url | TEXT | |
 | created_at | TIMESTAMP | DEFAULT NOW() |
-| updated_at | TIMESTAMP | DEFAULT NOW() |
+| updated_at | TIMESTAMP | DEFAULT NOW() (auto-update trigger) |
 
-#### `categories`
+#### `categories` ✅
 | Column | Type | Constraints |
 |--------|------|-------------|
 | id | UUID | PRIMARY KEY |
@@ -65,7 +89,7 @@
 | icon | VARCHAR(50) | |
 | created_at | TIMESTAMP | DEFAULT NOW() |
 
-#### `listings`
+#### `listings` ✅
 | Column | Type | Constraints |
 |--------|------|-------------|
 | id | UUID | PRIMARY KEY |
@@ -77,7 +101,7 @@
 | image_url | TEXT | |
 | status | VARCHAR(20) | DEFAULT 'active' |
 | created_at | TIMESTAMP | DEFAULT NOW() |
-| updated_at | TIMESTAMP | DEFAULT NOW() |
+| updated_at | TIMESTAMP | DEFAULT NOW() (auto-update trigger) |
 
 #### `wishlists`
 | Column | Type | Constraints |
@@ -127,40 +151,44 @@
 
 ---
 
-## Implementation Order
+## Implementation Order & Status
 
-| # | Feature | SQL File | Flutter Files |
-|---|---------|----------|---------------|
-| 1 | User Registration | `001_user_registration.sql` | `lib/features/auth/` |
-| 2 | User Login | `002_user_login.sql` | `lib/features/auth/` |
-| 3 | Logout | - | `lib/features/auth/` |
-| 4 | Profile Management | - | `lib/features/profile/` |
-| 5 | Listing Management | - | `lib/features/listings/` |
-| 6 | Product Posting | `006_product_posting.sql` | `lib/features/listings/` |
-| 7 | Browse Listings | `007_browse_listings.sql` | `lib/features/listings/` |
-| 8 | Category Filtering | `008_category_filtering.sql` | `lib/features/categories/` |
-| 9 | Search | `009_search.sql` | `lib/features/search/` |
-| 10 | Price Filter | `010_price_filter.sql` | `lib/features/listings/` |
-| 11 | Buyer-Seller Chat | `011_chat.sql` | `lib/features/chat/` |
-| 12 | Wishlist | `012_wishlist.sql` | `lib/features/wishlist/` |
-| 13 | Report/Block | `013_report_block.sql` | `lib/features/users/` |
+| # | Feature | SQL File | Flutter | Status |
+|---|---------|----------|---------|--------|
+| 1 | User Registration | `001_user_registration.sql` | `lib/features/auth/` | ✅ Done |
+| 2 | User Login | - | `lib/features/auth/` | ✅ Done |
+| 3 | Logout | - | `lib/features/auth/` | ✅ Done |
+| 4 | Profile Management | - | `lib/features/profile/` | ✅ Done |
+| 5 | Listing Management | - | `lib/features/listings/` | ✅ Done |
+| 6 | Product Posting | `002_categories_and_listings.sql` | `lib/features/listings/` | ✅ Done |
+| 7 | Browse Listings | - | `lib/features/listings/` | Pending |
+| 8 | Category Filtering | - | `lib/features/listings/` | Pending |
+| 9 | Search | - | `lib/features/search/` | Pending |
+| 10 | Price Filter | - | `lib/features/listings/` | Pending |
+| 11 | Buyer-Seller Chat | - | `lib/features/chat/` | Pending |
+| 12 | Wishlist | - | `lib/features/wishlist/` | Pending |
+| 13 | Report/Block | - | `lib/features/users/` | Pending |
 
 ---
 
-## Feature Status
+## Completed Setup
+- ✅ Project structure (Clean Architecture)
+- ✅ Dependencies (flutter_bloc, supabase_flutter, get_it, dartz, etc.)
+- ✅ Supabase initialization with .env support
+- ✅ User Registration (SQL + Flutter)
+- ✅ User Login (Flutter)
+- ✅ Logout (Flutter)
+- ✅ API logging on all auth calls
+- ✅ Product Posting (SQL + Flutter + Image Upload)
+- ✅ Categories with seed data (Books, Electronics, Furniture, Clothing, etc.)
+- ✅ Profile Management (View/edit profile, avatar upload)
+- ✅ My Listings (View/delete own listings)
 
-| # | Feature | Status |
-|---|---------|--------|
-| 1 | User Registration | Pending |
-| 2 | User Login | Pending |
-| 3 | Logout | Pending |
-| 4 | Profile Management | Pending |
-| 5 | Listing Management | Pending |
-| 6 | Product Posting | Pending |
-| 7 | Browse Listings | Pending |
-| 8 | Category Filtering | Pending |
-| 9 | Search | Pending |
-| 10 | Price Filter | Pending |
-| 11 | Buyer-Seller Chat | Pending |
-| 12 | Wishlist | Pending |
-| 13 | Report/Block | Pending |
+---
+
+## Supabase Setup Required
+Before running, ensure in Supabase dashboard:
+1. Run migration `002_categories_and_listings.sql`
+2. Create storage bucket named `listings` (for listing images)
+3. Create storage bucket named `avatars` (for profile pictures)
+4. Add RLS policy for public read access to storage buckets

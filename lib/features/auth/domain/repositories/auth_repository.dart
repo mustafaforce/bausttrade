@@ -19,5 +19,11 @@ abstract class AuthRepository {
 
   Future<Either<Failure, User>> getCurrentUser();
 
+  Future<Either<Failure, User>> updateProfile({
+    String? name,
+    String? phone,
+    String? avatarUrl,
+  });
+
   Future<bool> isLoggedIn();
 }

@@ -19,6 +19,12 @@ abstract class AuthRemoteDataSource {
 
   Future<UserModel?> getCurrentUser();
 
+  Future<UserModel> updateProfile({
+    String? name,
+    String? phone,
+    String? avatarUrl,
+  });
+
   Future<bool> isLoggedIn();
 }
 
@@ -138,5 +144,35 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final session = supabaseClient.auth.currentSession;
     Logger.log('Session active: ${session != null}');
     return session != null;
+  }
+
+  @override
+  Future<UserModel> updateProfile({
+    String? name,
+    String? phone,
+    String? avatarUrl,
+  }) async {
+    final userId = supabaseClient.auth.currentUser!.id;
+
+    Logger.api('PATCH', '/users/$userId');
+    try {
+      final updates = <String, dynamic>{};
+      if (name != null) updates['name'] = name;
+      if (phone != null) updates['phone'] = phone;
+      if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
+
+      final response = await supabaseClient
+          .from('users')
+          .update(updates)
+          .eq('id', userId)
+          .select()
+          .single();
+
+      Logger.success('Profile updated: $userId');
+      return UserModel.fromJson(response);
+    } catch (e, st) {
+      Logger.error('Profile update failed', error: e, stackTrace: st);
+      rethrow;
+    }
   }
 }
