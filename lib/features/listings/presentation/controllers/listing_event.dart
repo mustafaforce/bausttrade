@@ -70,3 +70,12 @@ class UpdateListingEvent extends ListingEvent {
   @override
   List<Object?> get props => [id, title, description, price, categoryId, imageUrl, status];
 }
+
+class SearchListingsEvent extends ListingEvent {
+  final String query;
+
+  const SearchListingsEvent(this.query);
+
+  @override
+  List<Object> get props => [query];
+}

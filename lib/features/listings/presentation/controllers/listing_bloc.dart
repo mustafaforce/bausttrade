@@ -7,6 +7,7 @@ import '../../domain/usecases/create_listing_usecase.dart';
 import '../../domain/usecases/delete_listing_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
 import '../../domain/usecases/get_listings_usecase.dart';
+import '../../domain/usecases/search_listings_usecase.dart';
 import '../../domain/usecases/update_listing_usecase.dart';
 
 part 'listing_event.dart';
@@ -18,6 +19,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
   final GetCategoriesUseCase getCategoriesUseCase;
   final DeleteListingUseCase deleteListingUseCase;
   final UpdateListingUseCase updateListingUseCase;
+  final SearchListingsUseCase searchListingsUseCase;
 
   ListingBloc({
     required this.createListingUseCase,
@@ -25,6 +27,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     required this.getCategoriesUseCase,
     required this.deleteListingUseCase,
     required this.updateListingUseCase,
+    required this.searchListingsUseCase,
   }) : super(ListingInitial()) {
     on<CreateListingEvent>(_onCreateListing);
     on<GetListingsEvent>(_onGetListings);
@@ -32,6 +35,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     on<GetListingsByCategoryEvent>(_onGetListingsByCategory);
     on<DeleteListingEvent>(_onDeleteListing);
     on<UpdateListingEvent>(_onUpdateListing);
+    on<SearchListingsEvent>(_onSearchListings);
   }
 
   Future<void> _onCreateListing(
@@ -117,6 +121,18 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     result.fold(
       (failure) => emit(ListingError(failure.message)),
       (listing) => emit(ListingUpdated(listing)),
+    );
+  }
+
+  Future<void> _onSearchListings(
+    SearchListingsEvent event,
+    Emitter<ListingState> emit,
+  ) async {
+    emit(ListingLoading());
+    final result = await searchListingsUseCase(SearchListingsParams(query: event.query));
+    result.fold(
+      (failure) => emit(ListingError(failure.message)),
+      (listings) => emit(ListingsLoaded(listings)),
     );
   }
 }

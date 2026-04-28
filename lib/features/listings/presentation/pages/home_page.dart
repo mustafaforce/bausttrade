@@ -76,6 +76,17 @@ class _HomePageState extends State<HomePage> {
             ),
             actions: [
               IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  showSearch(
+                    context: context,
+                    delegate: _ListingSearchDelegate(
+                      listingBloc: context.read<ListingBloc>(),
+                    ),
+                  );
+                },
+              ),
+              IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: () {
                   context.read<auth.AuthBloc>().add(auth.LogoutEvent());
@@ -299,6 +310,88 @@ class _ListingCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ListingSearchDelegate extends SearchDelegate<String> {
+  final ListingBloc listingBloc;
+
+  _ListingSearchDelegate({required this.listingBloc});
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, '');
+        listingBloc.add(GetListingsEvent());
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    if (query.trim().isNotEmpty) {
+      listingBloc.add(SearchListingsEvent(query.trim()));
+    }
+
+    return BlocBuilder<ListingBloc, ListingState>(
+      bloc: listingBloc,
+      builder: (context, state) {
+        if (state is ListingLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is ListingsLoaded) {
+          if (state.listings.isEmpty) {
+            return Center(
+              child: Text('No results for "$query"'),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: state.listings.length,
+            itemBuilder: (context, index) {
+              final listing = state.listings[index];
+              return ListTile(
+                leading: listing.imageUrl != null
+                    ? Image.network(listing.imageUrl!, width: 50, height: 50, fit: BoxFit.cover)
+                    : const Icon(Icons.image),
+                title: Text(listing.title),
+                subtitle: Text('\$${listing.price.toStringAsFixed(2)}'),
+                onTap: () {
+                  close(context, listing.id);
+                },
+              );
+            },
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    if (query.isNotEmpty) {
+      return buildResults(context);
+    }
+    return const Center(
+      child: Text('Search for listings by title or description'),
     );
   }
 }

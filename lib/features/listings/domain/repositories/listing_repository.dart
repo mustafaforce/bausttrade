@@ -31,4 +31,6 @@ abstract class ListingRepository {
     String? imageUrl,
     String? status,
   });
+
+  Future<Either<Failure, List<Listing>>> searchListings(String query);
 }

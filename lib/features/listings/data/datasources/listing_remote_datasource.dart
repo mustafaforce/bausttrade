@@ -31,6 +31,8 @@ abstract class ListingRemoteDataSource {
     String? imageUrl,
     String? status,
   });
+
+  Future<List<ListingModel>> searchListings(String query);
 }
 
 class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
@@ -189,6 +191,26 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       return ListingModel.fromJson(response);
     } catch (e, st) {
       Logger.error('Failed to update listing', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<ListingModel>> searchListings(String query) async {
+    Logger.api('GET', '/listings?title=ilike.$query');
+
+    try {
+      final response = await supabaseClient
+          .from('listings')
+          .select()
+          .eq('status', 'active')
+          .or('title.ilike.%$query%,description.ilike.%$query%')
+          .order('created_at', ascending: false);
+
+      Logger.success('Search found ${response.length} listings');
+      return (response as List).map((e) => ListingModel.fromJson(e)).toList();
+    } catch (e, st) {
+      Logger.error('Search failed', error: e, stackTrace: st);
       rethrow;
     }
   }

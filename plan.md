@@ -163,7 +163,7 @@ lib/
 | 6 | Product Posting | `002_categories_and_listings.sql` | `lib/features/listings/` | ✅ Done |
 | 7 | Browse Listings | - | `lib/features/listings/` | ✅ Done |
 | 8 | Category Filtering | - | `lib/features/listings/` | ✅ Done |
-| 9 | Search | - | `lib/features/search/` | Pending |
+| 9 | Search | - | `lib/features/listings/` | ✅ Done |
 | 10 | Price Filter | - | `lib/features/listings/` | Pending |
 | 11 | Buyer-Seller Chat | - | `lib/features/chat/` | Pending |
 | 12 | Wishlist | - | `lib/features/wishlist/` | Pending |
@@ -182,6 +182,7 @@ lib/
 - ✅ Product Posting (SQL + Flutter + Image Upload)
 - ✅ Browse Listings (Grid view of all active listings with pull-to-refresh)
 - ✅ Category Filtering (Dropdown in app bar to filter by category)
+- ✅ Search (Search bar in app bar with search delegate for title/description)
 - ✅ Categories with seed data (Books, Electronics, Furniture, Clothing, etc.)
 - ✅ Profile Management (View/edit profile, avatar upload)
 - ✅ My Listings (View/delete/edit own listings)
