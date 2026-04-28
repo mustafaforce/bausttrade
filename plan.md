@@ -9,7 +9,7 @@
 
 ### Phase 2: User Management ✅
 4. **Profile Management** - View/edit user profile, avatar upload ✅
-5. **Listing Management** - View/delete own listings ✅
+5. **Listing Management** - View/delete/edit own listings ✅
 
 ### Phase 3: Product Listings
 6. **Product Posting** - Create listing (image, title, category, price, description) ✅
@@ -161,8 +161,8 @@ lib/
 | 4 | Profile Management | - | `lib/features/profile/` | ✅ Done |
 | 5 | Listing Management | - | `lib/features/listings/` | ✅ Done |
 | 6 | Product Posting | `002_categories_and_listings.sql` | `lib/features/listings/` | ✅ Done |
-| 7 | Browse Listings | - | `lib/features/listings/` | Pending |
-| 8 | Category Filtering | - | `lib/features/listings/` | Pending |
+| 7 | Browse Listings | - | `lib/features/listings/` | ✅ Done |
+| 8 | Category Filtering | - | `lib/features/listings/` | ✅ Done |
 | 9 | Search | - | `lib/features/search/` | Pending |
 | 10 | Price Filter | - | `lib/features/listings/` | Pending |
 | 11 | Buyer-Seller Chat | - | `lib/features/chat/` | Pending |
@@ -180,9 +180,12 @@ lib/
 - ✅ Logout (Flutter)
 - ✅ API logging on all auth calls
 - ✅ Product Posting (SQL + Flutter + Image Upload)
+- ✅ Browse Listings (Grid view of all active listings with pull-to-refresh)
+- ✅ Category Filtering (Dropdown in app bar to filter by category)
 - ✅ Categories with seed data (Books, Electronics, Furniture, Clothing, etc.)
 - ✅ Profile Management (View/edit profile, avatar upload)
-- ✅ My Listings (View/delete own listings)
+- ✅ My Listings (View/delete/edit own listings)
+- ✅ Edit Listing functionality (update title, description, price, category, image)
 
 ---
 
