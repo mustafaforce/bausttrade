@@ -80,6 +80,7 @@ class BaustTradeApp extends StatelessWidget {
               conversationId: args?['conversationId'] as String?,
               listing: args?['listing'],
               otherUserId: args?['otherUserId'] as String?,
+              sellerName: args?['sellerName'] as String?,
             );
           },
           '/listing-detail': (context) {

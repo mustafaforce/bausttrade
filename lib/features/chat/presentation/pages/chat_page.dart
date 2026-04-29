@@ -9,12 +9,14 @@ class ChatPage extends StatefulWidget {
   final String? conversationId;
   final Listing? listing;
   final String? otherUserId;
+  final String? sellerName;
 
   const ChatPage({
     super.key,
     this.conversationId,
     this.listing,
     this.otherUserId,
+    this.sellerName,
   });
 
   @override
@@ -24,18 +26,21 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final _messageController = TextEditingController();
   String? _activeConversationId;
+  late final ChatBloc _chatBloc;
 
   @override
   void initState() {
     super.initState();
+    _chatBloc = context.read<ChatBloc>();
     _activeConversationId = widget.conversationId;
     if (_activeConversationId != null) {
-      context.read<ChatBloc>().add(GetMessagesEvent(_activeConversationId!));
+      _chatBloc.add(GetMessagesEvent(_activeConversationId!));
     }
   }
 
   @override
   void dispose() {
+    _chatBloc.add(ResetChatEvent());
     _messageController.dispose();
     super.dispose();
   }
@@ -62,44 +67,41 @@ class _ChatPageState extends State<ChatPage> {
       listener: (context, state) {
         if (state is ConversationLoaded) {
           setState(() => _activeConversationId = state.conversation.id);
-          context.read<ChatBloc>().add(GetMessagesEvent(state.conversation.id));
+          _chatBloc.add(GetMessagesEvent(state.conversation.id));
         }
         if (state is MessageSent) {
-          context.read<ChatBloc>().add(GetMessagesEvent(_activeConversationId!));
+          _chatBloc.add(GetMessagesEvent(_activeConversationId!));
         }
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.listing != null
+          title: Text(widget.sellerName ?? (widget.listing != null
               ? 'Chat about "${widget.listing!.title}"'
-              : 'Chat'),
+              : 'Chat')),
         ),
         body: Column(
           children: [
             Expanded(
-              child: _activeConversationId == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : BlocBuilder<ChatBloc, ChatState>(
-                      builder: (context, state) {
-                        if (state is ChatLoading) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
+              child: BlocBuilder<ChatBloc, ChatState>(
+                builder: (context, state) {
+                  if (state is ChatLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                        if (state is MessagesLoaded &&
-                            state.conversationId == _activeConversationId) {
-                          return _MessageList(
-                            messages: state.messages,
-                            currentUserId: (context.read<auth.AuthBloc>().state
-                                    as auth.Authenticated)
-                                .user
-                                .id,
-                          );
-                        }
+                  if (state is MessagesLoaded &&
+                      state.conversationId == _activeConversationId) {
+                    return _MessageList(
+                      messages: state.messages,
+                      currentUserId: (context.read<auth.AuthBloc>().state
+                              as auth.Authenticated)
+                          .user
+                          .id,
+                    );
+                  }
 
-                        return const Center(
-                            child: Text('Start the conversation'));
-                      },
-                    ),
+                  return const Center(child: Text('Start the conversation'));
+                },
+              ),
             ),
             _MessageInput(
               controller: _messageController,

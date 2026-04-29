@@ -58,3 +58,5 @@ class SendMessageEvent extends ChatEvent {
   @override
   List<Object> get props => [conversationId, senderId, content];
 }
+
+class ResetChatEvent extends ChatEvent {}

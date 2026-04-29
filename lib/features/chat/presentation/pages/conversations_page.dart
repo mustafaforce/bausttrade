@@ -11,10 +11,30 @@ class ConversationsPage extends StatefulWidget {
   State<ConversationsPage> createState() => _ConversationsPageState();
 }
 
-class _ConversationsPageState extends State<ConversationsPage> {
+class _ConversationsPageState extends State<ConversationsPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadConversations();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (mounted) {
+      _loadConversations();
+    }
+  }
+
+  void _loadConversations() {
     final authState = context.read<auth.AuthBloc>().state;
     if (authState is auth.Authenticated) {
       context.read<ChatBloc>().add(GetConversationsEvent(authState.user.id));
@@ -23,13 +43,23 @@ class _ConversationsPageState extends State<ConversationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        _loadConversations();
+        Navigator.of(context).pop();
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Messages'),
       ),
       body: BlocBuilder<ChatBloc, ChatState>(
         builder: (context, state) {
-          if (state is ChatLoading) {
+          if (state is ChatInitial || state is ChatLoading) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _loadConversations();
+            });
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -75,26 +105,50 @@ class _ConversationsPageState extends State<ConversationsPage> {
               );
             }
 
-            return ListView.builder(
-              itemCount: state.conversations.length,
-              itemBuilder: (context, index) {
-                final conversation = state.conversations[index];
-                return ConversationTile(conversation: conversation);
+            return BlocBuilder<auth.AuthBloc, auth.AuthState>(
+              builder: (context, authState) {
+                final currentUserId = authState is auth.Authenticated ? authState.user.id : '';
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    _loadConversations();
+                  },
+                  child: ListView.builder(
+                    itemCount: state.conversations.length,
+                    itemBuilder: (context, index) {
+                      final conversation = state.conversations[index];
+                      final isBuyer = conversation.buyerId == currentUserId;
+                      final otherName = isBuyer ? conversation.sellerName : conversation.buyerName;
+                      final otherId = isBuyer ? conversation.sellerId : conversation.buyerId;
+                      return ConversationTile(
+                        conversation: conversation,
+                        otherName: otherName,
+                        otherId: otherId,
+                      );
+                    },
+                  ),
+                );
               },
             );
           }
 
           return const SizedBox.shrink();
         },
-      ),
+      ),)
     );
   }
 }
 
 class ConversationTile extends StatelessWidget {
   final Conversation conversation;
+  final String otherName;
+  final String otherId;
 
-  const ConversationTile({super.key, required this.conversation});
+  const ConversationTile({
+    super.key,
+    required this.conversation,
+    required this.otherName,
+    required this.otherId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -103,13 +157,14 @@ class ConversationTile extends StatelessWidget {
         backgroundColor: Colors.blue[100],
         child: const Icon(Icons.person, color: Colors.blue),
       ),
-      title: Text('Conversation ${conversation.id.substring(0, 8)}...'),
+      title: Text(otherName),
       subtitle: Text('Listing: ${conversation.listingId.substring(0, 8)}...'),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
         Navigator.pushNamed(context, '/chat', arguments: {
           'conversationId': conversation.id,
-          'otherUserId': conversation.sellerId,
+          'otherUserId': otherId,
+          'sellerName': otherName,
         });
       },
     );

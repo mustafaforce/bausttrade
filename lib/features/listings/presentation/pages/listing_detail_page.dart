@@ -147,6 +147,7 @@ class ListingDetailPage extends StatelessWidget {
     Navigator.pushNamed(context, '/chat', arguments: {
       'listing': listing,
       'otherUserId': listing.userId,
+      'sellerName': sellerName,
     });
   }
 }

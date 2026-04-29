@@ -26,6 +26,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<GetOrCreateConversationEvent>(_onGetOrCreateConversation);
     on<GetMessagesEvent>(_onGetMessages);
     on<SendMessageEvent>(_onSendMessage);
+    on<ResetChatEvent>(_onResetChat);
   }
 
   Future<void> _onGetConversations(
@@ -64,7 +65,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     GetMessagesEvent event,
     Emitter<ChatState> emit,
   ) async {
-    emit(ChatLoading());
     final result = await getMessagesUseCase(event.conversationId);
     result.fold(
       (failure) => emit(ChatError(failure.message)),
@@ -86,7 +86,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     ));
     result.fold(
       (failure) => emit(ChatError(failure.message)),
-      (message) => emit(MessageSent(message)),
+      (message) {
+        emit(MessageSent(message));
+        emit(MessagesLoaded(
+          messages: [...(state is MessagesLoaded ? (state as MessagesLoaded).messages : []), message],
+          conversationId: event.conversationId,
+        ));
+      },
     );
+  }
+
+  void _onResetChat(ResetChatEvent event, Emitter<ChatState> emit) {
+    emit(ChatInitial());
   }
 }
