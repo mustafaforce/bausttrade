@@ -26,6 +26,8 @@ abstract class AuthRemoteDataSource {
   });
 
   Future<bool> isLoggedIn();
+
+  Future<UserModel> getUserById(String id);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -172,6 +174,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return UserModel.fromJson(response);
     } catch (e, st) {
       Logger.error('Profile update failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UserModel> getUserById(String id) async {
+    Logger.api('GET', '/users/$id');
+    try {
+      final response = await supabaseClient
+          .from('users')
+          .select()
+          .eq('id', id)
+          .single();
+
+      Logger.success('User fetched: $id');
+      return UserModel.fromJson(response);
+    } catch (e, st) {
+      Logger.error('Failed to fetch user', error: e, stackTrace: st);
       rethrow;
     }
   }

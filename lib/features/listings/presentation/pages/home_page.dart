@@ -220,6 +220,14 @@ class _HomePageState extends State<HomePage> {
                     Navigator.pushNamed(context, '/my-listings');
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.message),
+                  title: const Text('Messages'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/conversations');
+                  },
+                ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.logout),
@@ -277,7 +285,18 @@ class _HomePageState extends State<HomePage> {
                     itemCount: listingState.listings.length,
                     itemBuilder: (context, index) {
                       final listing = listingState.listings[index];
-                      return _ListingCard(listing: listing);
+                      return _ListingCard(
+                        listing: listing,
+                        onTap: () {
+                          final authState = context.read<auth.AuthBloc>().state;
+                          if (authState is auth.Authenticated) {
+                            Navigator.pushNamed(context, '/listing-detail', arguments: {
+                              'listing': listing,
+                              'currentUser': authState.user,
+                            });
+                          }
+                        },
+                      );
                     },
                   ),
                 );
@@ -325,76 +344,79 @@ class _HomePageState extends State<HomePage> {
 
 class _ListingCard extends StatelessWidget {
   final dynamic listing;
+  final VoidCallback? onTap;
 
-  const _ListingCard({required this.listing});
+  const _ListingCard({required this.listing, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 3,
-            child: listing.imageUrl != null
-                ? Image.network(
-                    listing.imageUrl!,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.image, size: 40),
-                    ),
-                  )
-                : Container(
-                    color: Colors.grey[200],
-                    child: const Center(
-                      child: Icon(Icons.image, size: 40, color: Colors.grey),
-                    ),
-                  ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    listing.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
+                  Expanded(
+                    flex: 3,
+                    child: listing.imageUrl != null
+                        ? Image.network(
+                            listing.imageUrl!,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => Container(
+                              color: Colors.grey[200],
+                              child: const Icon(Icons.image, size: 40),
+                            ),
+                          )
+                        : Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Icon(Icons.image, size: 40, color: Colors.grey),
+                            ),
+                          ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '\$${listing.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    listing.categoryId ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
+                  Expanded(
+                    flex: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            listing.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '\$${listing.price.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            listing.categoryId ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ),
-          ),
-        ],
-      ),
+               )         ),
     );
   }
 }

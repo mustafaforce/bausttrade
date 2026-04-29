@@ -165,7 +165,7 @@ lib/
 | 8 | Category Filtering | - | `lib/features/listings/` | ✅ Done |
 | 9 | Search | - | `lib/features/listings/` | ✅ Done |
 | 10 | Price Filter | - | `lib/features/listings/` | ✅ Done |
-| 11 | Buyer-Seller Chat | - | `lib/features/chat/` | Pending |
+| 11 | Buyer-Seller Chat | `003_chat_system.sql` | `lib/features/chat/` | ✅ Done |
 | 12 | Wishlist | - | `lib/features/wishlist/` | Pending |
 | 13 | Report/Block | - | `lib/features/users/` | Pending |
 

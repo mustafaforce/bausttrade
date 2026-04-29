@@ -4,10 +4,19 @@ import 'features/auth/data/datasources/auth_remote_datasource.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/get_current_user_usecase.dart';
+import 'features/auth/domain/usecases/get_user_by_id_usecase.dart';
 import 'features/auth/domain/usecases/login_usecase.dart';
 import 'features/auth/domain/usecases/logout_usecase.dart';
 import 'features/auth/domain/usecases/register_usecase.dart';
 import 'features/auth/presentation/controllers/auth_bloc.dart' as auth;
+import 'features/chat/data/datasources/chat_remote_datasource.dart';
+import 'features/chat/data/repositories/chat_repository_impl.dart';
+import 'features/chat/domain/repositories/chat_repository.dart';
+import 'features/chat/domain/usecases/get_conversations_usecase.dart';
+import 'features/chat/domain/usecases/get_or_create_conversation_usecase.dart';
+import 'features/chat/domain/usecases/get_messages_usecase.dart';
+import 'features/chat/domain/usecases/send_message_usecase.dart';
+import 'features/chat/presentation/controllers/chat_bloc.dart';
 import 'features/listings/data/datasources/listing_remote_datasource.dart';
 import 'features/listings/data/repositories/listing_repository_impl.dart';
 import 'features/listings/domain/repositories/listing_repository.dart';
@@ -51,12 +60,23 @@ Future<void> init() async {
     ),
   );
 
+  // Chat BLoC
+  sl.registerFactory(
+    () => ChatBloc(
+      getConversationsUseCase: sl(),
+      getOrCreateConversationUseCase: sl(),
+      getMessagesUseCase: sl(),
+      sendMessageUseCase: sl(),
+    ),
+  );
+
   // Auth Use cases
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
+  sl.registerLazySingleton(() => GetUserByIdUseCase(sl()));
 
   // Listing Use cases
   sl.registerLazySingleton(() => CreateListingUseCase(sl()));
@@ -66,6 +86,12 @@ Future<void> init() async {
   sl.registerLazySingleton(() => UpdateListingUseCase(sl()));
   sl.registerLazySingleton(() => SearchListingsUseCase(sl()));
   sl.registerLazySingleton(() => FilterListingsUseCase(sl()));
+
+  // Chat Use cases
+  sl.registerLazySingleton(() => GetConversationsUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrCreateConversationUseCase(sl()));
+  sl.registerLazySingleton(() => GetMessagesUseCase(sl()));
+  sl.registerLazySingleton(() => SendMessageUseCase(sl()));
 
   // Auth Repository
   sl.registerLazySingleton<AuthRepository>(
@@ -85,5 +111,15 @@ Future<void> init() async {
   // Listing Data sources
   sl.registerLazySingleton<ListingRemoteDataSource>(
     () => ListingRemoteDataSourceImpl(supabaseClient: sl()),
+  );
+
+  // Chat Repository
+  sl.registerLazySingleton<ChatRepository>(
+    () => ChatRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Chat Data sources
+  sl.registerLazySingleton<ChatRemoteDataSource>(
+    () => ChatRemoteDataSourceImpl(supabaseClient: sl()),
   );
 }

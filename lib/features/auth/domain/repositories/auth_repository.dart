@@ -26,4 +26,6 @@ abstract class AuthRepository {
   });
 
   Future<bool> isLoggedIn();
+
+  Future<Either<Failure, User>> getUserById(String id);
 }

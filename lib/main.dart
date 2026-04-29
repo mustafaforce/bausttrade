@@ -12,6 +12,10 @@ import 'features/auth/presentation/pages/register_page.dart';
 import 'features/listings/presentation/controllers/listing_bloc.dart';
 import 'features/listings/presentation/pages/create_listing_page.dart';
 import 'features/listings/presentation/pages/home_page.dart';
+import 'features/listings/presentation/pages/listing_detail_page.dart';
+import 'features/chat/presentation/controllers/chat_bloc.dart';
+import 'features/chat/presentation/pages/chat_page.dart';
+import 'features/chat/presentation/pages/conversations_page.dart';
 import 'features/profile/presentation/pages/my_listings_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'injection_container.dart' as di;
@@ -52,6 +56,9 @@ class BaustTradeApp extends StatelessWidget {
         BlocProvider(
           create: (_) => di.sl<ListingBloc>(),
         ),
+        BlocProvider(
+          create: (_) => di.sl<ChatBloc>(),
+        ),
       ],
       child: MaterialApp(
         title: 'Baust CampusTrade',
@@ -66,6 +73,22 @@ class BaustTradeApp extends StatelessWidget {
           '/create-listing': (context) => const CreateListingPage(),
           '/profile': (context) => const ProfilePage(),
           '/my-listings': (context) => const MyListingsPage(),
+          '/conversations': (context) => const ConversationsPage(),
+          '/chat': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+            return ChatPage(
+              conversationId: args?['conversationId'] as String?,
+              listing: args?['listing'],
+              otherUserId: args?['otherUserId'] as String?,
+            );
+          },
+          '/listing-detail': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return ListingDetailPage(
+              listing: args['listing'],
+              currentUser: args['currentUser'],
+            );
+          },
         },
       ),
     );
