@@ -117,4 +117,22 @@ class ListingRepositoryImpl implements ListingRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<Listing>>> filterListings({
+    String? categoryId,
+    double? minPrice,
+    double? maxPrice,
+  }) async {
+    try {
+      final listings = await remoteDataSource.filterListings(
+        categoryId: categoryId,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+      );
+      return Right(listings);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

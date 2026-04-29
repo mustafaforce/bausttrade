@@ -12,6 +12,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? _selectedCategoryId;
+  double? _minPrice;
+  double? _maxPrice;
 
   @override
   void initState() {
@@ -27,6 +29,82 @@ class _HomePageState extends State<HomePage> {
     } else {
       context.read<ListingBloc>().add(GetListingsEvent());
     }
+  }
+
+  void _showPriceFilterDialog() {
+    final minController = TextEditingController(
+      text: _minPrice?.toStringAsFixed(0) ?? '',
+    );
+    final maxController = TextEditingController(
+      text: _maxPrice?.toStringAsFixed(0) ?? '',
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Filter by Price'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: minController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Min Price',
+                prefixText: '\$ ',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: maxController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Max Price',
+                prefixText: '\$ ',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _minPrice = null;
+                _maxPrice = null;
+              });
+              Navigator.pop(context);
+              _applyPriceFilter(null, null);
+            },
+            child: const Text('Clear'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final min = double.tryParse(minController.text);
+              final max = double.tryParse(maxController.text);
+              setState(() {
+                _minPrice = min;
+                _maxPrice = max;
+              });
+              Navigator.pop(context);
+              _applyPriceFilter(min, max);
+            },
+            child: const Text('Apply'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _applyPriceFilter(double? min, double? max) {
+    context.read<ListingBloc>().add(FilterListingsEvent(
+      categoryId: _selectedCategoryId,
+      minPrice: min,
+      maxPrice: max,
+    ));
   }
 
   @override
@@ -85,6 +163,13 @@ class _HomePageState extends State<HomePage> {
                     ),
                   );
                 },
+              ),
+              IconButton(
+                icon: Badge(
+                  isLabelVisible: _minPrice != null || _maxPrice != null,
+                  child: const Icon(Icons.filter_list),
+                ),
+                onPressed: _showPriceFilterDialog,
               ),
               IconButton(
                 icon: const Icon(Icons.logout),

@@ -79,3 +79,18 @@ class SearchListingsEvent extends ListingEvent {
   @override
   List<Object> get props => [query];
 }
+
+class FilterListingsEvent extends ListingEvent {
+  final String? categoryId;
+  final double? minPrice;
+  final double? maxPrice;
+
+  const FilterListingsEvent({
+    this.categoryId,
+    this.minPrice,
+    this.maxPrice,
+  });
+
+  @override
+  List<Object?> get props => [categoryId, minPrice, maxPrice];
+}

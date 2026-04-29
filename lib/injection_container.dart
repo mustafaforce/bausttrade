@@ -13,6 +13,7 @@ import 'features/listings/data/repositories/listing_repository_impl.dart';
 import 'features/listings/domain/repositories/listing_repository.dart';
 import 'features/listings/domain/usecases/create_listing_usecase.dart';
 import 'features/listings/domain/usecases/delete_listing_usecase.dart';
+import 'features/listings/domain/usecases/filter_listings_usecase.dart';
 import 'features/listings/domain/usecases/get_categories_usecase.dart';
 import 'features/listings/domain/usecases/get_listings_usecase.dart';
 import 'features/listings/domain/usecases/search_listings_usecase.dart';
@@ -46,6 +47,7 @@ Future<void> init() async {
       deleteListingUseCase: sl(),
       updateListingUseCase: sl(),
       searchListingsUseCase: sl(),
+      filterListingsUseCase: sl(),
     ),
   );
 
@@ -63,6 +65,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => DeleteListingUseCase(sl()));
   sl.registerLazySingleton(() => UpdateListingUseCase(sl()));
   sl.registerLazySingleton(() => SearchListingsUseCase(sl()));
+  sl.registerLazySingleton(() => FilterListingsUseCase(sl()));
 
   // Auth Repository
   sl.registerLazySingleton<AuthRepository>(

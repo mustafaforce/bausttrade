@@ -33,6 +33,12 @@ abstract class ListingRemoteDataSource {
   });
 
   Future<List<ListingModel>> searchListings(String query);
+
+  Future<List<ListingModel>> filterListings({
+    String? categoryId,
+    double? minPrice,
+    double? maxPrice,
+  });
 }
 
 class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
@@ -211,6 +217,40 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       return (response as List).map((e) => ListingModel.fromJson(e)).toList();
     } catch (e, st) {
       Logger.error('Search failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<ListingModel>> filterListings({
+    String? categoryId,
+    double? minPrice,
+    double? maxPrice,
+  }) async {
+    Logger.api('GET', '/listings?filters=category:$categoryId,minPrice:$minPrice,maxPrice:$maxPrice');
+
+    try {
+      var query = supabaseClient
+          .from('listings')
+          .select()
+          .eq('status', 'active');
+
+      if (categoryId != null) {
+        query = query.eq('category_id', categoryId);
+      }
+      if (minPrice != null) {
+        query = query.gte('price', minPrice);
+      }
+      if (maxPrice != null) {
+        query = query.lte('price', maxPrice);
+      }
+
+      final response = await query.order('created_at', ascending: false);
+
+      Logger.success('Filter found ${response.length} listings');
+      return (response as List).map((e) => ListingModel.fromJson(e)).toList();
+    } catch (e, st) {
+      Logger.error('Filter failed', error: e, stackTrace: st);
       rethrow;
     }
   }

@@ -5,6 +5,7 @@ import '../../domain/entities/category.dart';
 import '../../domain/entities/listing.dart';
 import '../../domain/usecases/create_listing_usecase.dart';
 import '../../domain/usecases/delete_listing_usecase.dart';
+import '../../domain/usecases/filter_listings_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
 import '../../domain/usecases/get_listings_usecase.dart';
 import '../../domain/usecases/search_listings_usecase.dart';
@@ -20,6 +21,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
   final DeleteListingUseCase deleteListingUseCase;
   final UpdateListingUseCase updateListingUseCase;
   final SearchListingsUseCase searchListingsUseCase;
+  final FilterListingsUseCase filterListingsUseCase;
 
   ListingBloc({
     required this.createListingUseCase,
@@ -28,6 +30,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     required this.deleteListingUseCase,
     required this.updateListingUseCase,
     required this.searchListingsUseCase,
+    required this.filterListingsUseCase,
   }) : super(ListingInitial()) {
     on<CreateListingEvent>(_onCreateListing);
     on<GetListingsEvent>(_onGetListings);
@@ -36,6 +39,7 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     on<DeleteListingEvent>(_onDeleteListing);
     on<UpdateListingEvent>(_onUpdateListing);
     on<SearchListingsEvent>(_onSearchListings);
+    on<FilterListingsEvent>(_onFilterListings);
   }
 
   Future<void> _onCreateListing(
@@ -121,6 +125,22 @@ class ListingBloc extends Bloc<ListingEvent, ListingState> {
     result.fold(
       (failure) => emit(ListingError(failure.message)),
       (listing) => emit(ListingUpdated(listing)),
+    );
+  }
+
+  Future<void> _onFilterListings(
+    FilterListingsEvent event,
+    Emitter<ListingState> emit,
+  ) async {
+    emit(ListingLoading());
+    final result = await filterListingsUseCase(FilterListingsParams(
+      categoryId: event.categoryId,
+      minPrice: event.minPrice,
+      maxPrice: event.maxPrice,
+    ));
+    result.fold(
+      (failure) => emit(ListingError(failure.message)),
+      (listings) => emit(ListingsLoaded(listings)),
     );
   }
 

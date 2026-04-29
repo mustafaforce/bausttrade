@@ -33,4 +33,10 @@ abstract class ListingRepository {
   });
 
   Future<Either<Failure, List<Listing>>> searchListings(String query);
+
+  Future<Either<Failure, List<Listing>>> filterListings({
+    String? categoryId,
+    double? minPrice,
+    double? maxPrice,
+  });
 }

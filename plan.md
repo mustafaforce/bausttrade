@@ -164,7 +164,7 @@ lib/
 | 7 | Browse Listings | - | `lib/features/listings/` | ✅ Done |
 | 8 | Category Filtering | - | `lib/features/listings/` | ✅ Done |
 | 9 | Search | - | `lib/features/listings/` | ✅ Done |
-| 10 | Price Filter | - | `lib/features/listings/` | Pending |
+| 10 | Price Filter | - | `lib/features/listings/` | ✅ Done |
 | 11 | Buyer-Seller Chat | - | `lib/features/chat/` | Pending |
 | 12 | Wishlist | - | `lib/features/wishlist/` | Pending |
 | 13 | Report/Block | - | `lib/features/users/` | Pending |
