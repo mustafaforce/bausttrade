@@ -157,7 +157,7 @@ class _MyListingsPageState extends State<MyListingsPage> {
                             style: MetaTypography.bodyMdBold,
                           ),
                           subtitle: Text(
-                            '\$${listing['price']}',
+                            '৳${listing['price']}',
                             style: MetaTypography.bodySmBold.copyWith(
                               color: MetaColors.inkDeep,
                             ),

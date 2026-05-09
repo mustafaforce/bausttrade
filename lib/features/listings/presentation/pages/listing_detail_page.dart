@@ -54,7 +54,7 @@ class ListingDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: MetaSpacing.xs),
             Text(
-              '\$${listing.price.toStringAsFixed(2)}',
+              '৳${listing.price.toStringAsFixed(2)}',
               style: MetaTypography.headingMd.copyWith(
                 color: MetaColors.inkDeep,
                 fontWeight: FontWeight.w500,

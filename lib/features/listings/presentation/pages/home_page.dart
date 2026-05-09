@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 labelText: 'Min Price',
-                prefixText: '\$ ',
+                prefixText: '৳ ',
               ),
             ),
             const SizedBox(height: MetaSpacing.md),
@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> {
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 labelText: 'Max Price',
-                prefixText: '\$ ',
+                prefixText: '৳ ',
               ),
             ),
           ],
@@ -251,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                       return MetaListingCard(
                         imageUrl: listing.imageUrl,
                         title: listing.title,
-                        price: '\$${listing.price.toStringAsFixed(2)}',
+                        price: '৳${listing.price.toStringAsFixed(2)}',
                         subtitle: listing.categoryId,
                         onTap: () {
                           final authState = context.read<auth.AuthBloc>().state;
@@ -400,7 +400,7 @@ class _ListingSearchDelegate extends SearchDelegate<String> {
                 ),
                 title: Text(listing.title, style: MetaTypography.bodyMdBold),
                 subtitle: Text(
-                  '\$${listing.price.toStringAsFixed(2)}',
+                  '৳${listing.price.toStringAsFixed(2)}',
                   style: MetaTypography.bodySm.copyWith(color: MetaColors.inkDeep),
                 ),
                 onTap: () {
