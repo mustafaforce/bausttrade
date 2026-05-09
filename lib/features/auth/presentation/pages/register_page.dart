@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/design/meta_spacing.dart';
+import '../../../../core/design/widgets/meta_buttons.dart';
+import '../../../../core/design/widgets/meta_inputs.dart';
 import '../controllers/auth_bloc.dart' as auth;
 
 class RegisterPage extends StatefulWidget {
@@ -56,19 +59,17 @@ class _RegisterPageState extends State<RegisterPage> {
           }
         },
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(MetaSpacing.xl),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 24),
-                TextFormField(
+                const SizedBox(height: MetaSpacing.xl),
+                MetaTextInput(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person_outline),
-                  ),
+                  labelText: 'Full Name',
+                  prefixIcon: const Icon(Icons.person_outline),
                   textCapitalization: TextCapitalization.words,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -77,13 +78,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: MetaSpacing.base),
+                MetaTextInput(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
+                  labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email_outlined),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -96,33 +95,29 @@ class _RegisterPageState extends State<RegisterPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: MetaSpacing.base),
+                MetaTextInput(
                   controller: _phoneController,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone (optional)',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                  ),
+                  labelText: 'Phone (optional)',
+                  prefixIcon: const Icon(Icons.phone_outlined),
                   keyboardType: TextInputType.phone,
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: MetaSpacing.base),
+                MetaTextInput(
                   controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
                   obscureText: _obscurePassword,
                   validator: (value) {
@@ -135,23 +130,17 @@ class _RegisterPageState extends State<RegisterPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: MetaSpacing.xxl),
                 BlocBuilder<auth.AuthBloc, auth.AuthState>(
                   builder: (context, state) {
-                    return ElevatedButton(
-                      onPressed:
-                          state is auth.AuthLoading ? null : () => _onRegister(),
-                      child: state is auth.AuthLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Register'),
+                    return MetaPrimaryButton(
+                      label: 'Register',
+                      isLoading: state is auth.AuthLoading,
+                      onPressed: _onRegister,
                     );
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: MetaSpacing.base),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pushNamed('/login');

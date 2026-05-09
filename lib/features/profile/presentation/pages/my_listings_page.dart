@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/design/meta_colors.dart';
+import '../../../../core/design/meta_radius.dart';
+import '../../../../core/design/meta_spacing.dart';
+import '../../../../core/design/meta_typography.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../listings/domain/entities/listing.dart';
 import '../../../listings/presentation/controllers/listing_bloc.dart';
@@ -60,7 +64,7 @@ class _MyListingsPageState extends State<MyListingsPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: MetaColors.critical)),
           ),
         ],
       ),
@@ -99,17 +103,20 @@ class _MyListingsPageState extends State<MyListingsPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.inventory_2_outlined,
-                          size: 64, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
+                          size: 64, color: MetaColors.steel),
+                      const SizedBox(height: MetaSpacing.base),
                       Text(
                         'No listings yet',
-                        style: TextStyle(
-                            fontSize: 18, color: Colors.grey[600]),
+                        style: MetaTypography.headingSm.copyWith(
+                          color: MetaColors.charcoal,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: MetaSpacing.xs),
                       Text(
                         'Tap + to create your first listing',
-                        style: TextStyle(color: Colors.grey[500]),
+                        style: MetaTypography.bodyMd.copyWith(
+                          color: MetaColors.steel,
+                        ),
                       ),
                     ],
                   ),
@@ -117,55 +124,53 @@ class _MyListingsPageState extends State<MyListingsPage> {
               : RefreshIndicator(
                   onRefresh: _loadMyListings,
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(MetaSpacing.base),
                     itemCount: _myListings.length,
                     itemBuilder: (context, index) {
                       final listing = _myListings[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: MetaSpacing.md),
+                        decoration: BoxDecoration(
+                          color: MetaColors.canvas,
+                          borderRadius: BorderRadius.circular(MetaRadius.xl),
+                          border: Border.all(color: MetaColors.hairlineSoft),
+                        ),
                         child: ListTile(
-                          contentPadding: const EdgeInsets.all(12),
-                          leading: listing['image_url'] != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
+                          contentPadding: const EdgeInsets.all(MetaSpacing.md),
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(MetaRadius.lg),
+                            child: listing['image_url'] != null
+                                ? Image.network(
                                     listing['image_url'],
                                     width: 60,
                                     height: 60,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
-                                      width: 60,
-                                      height: 60,
-                                      color: Colors.grey[200],
-                                      child: const Icon(Icons.image),
-                                    ),
-                                  ),
-                                )
-                              : Container(
-                                  width: 60,
-                                  height: 60,
-                                  color: Colors.grey[200],
-                                  child: const Icon(Icons.image),
-                                ),
+                                    errorBuilder: (_, __, ___) =>
+                                        _imagePlaceholder(),
+                                  )
+                                : _imagePlaceholder(),
+                          ),
                           title: Text(
                             listing['title'] ?? '',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                            style: MetaTypography.bodyMdBold,
                           ),
                           subtitle: Text(
                             '\$${listing['price']}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                            style: MetaTypography.bodySmBold.copyWith(
+                              color: MetaColors.inkDeep,
                             ),
                           ),
                           trailing: PopupMenuButton(
+                            icon: const Icon(Icons.more_vert,
+                                color: MetaColors.steel),
                             itemBuilder: (context) => [
                               const PopupMenuItem(
                                 value: 'edit',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.edit),
+                                    Icon(Icons.edit, color: MetaColors.ink),
                                     SizedBox(width: 8),
                                     Text('Edit'),
                                   ],
@@ -175,10 +180,12 @@ class _MyListingsPageState extends State<MyListingsPage> {
                                 value: 'delete',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.delete, color: Colors.red),
+                                    Icon(Icons.delete,
+                                        color: MetaColors.critical),
                                     SizedBox(width: 8),
                                     Text('Delete',
-                                        style: TextStyle(color: Colors.red)),
+                                        style:
+                                            TextStyle(color: MetaColors.critical)),
                                   ],
                                 ),
                               ),
@@ -191,17 +198,21 @@ class _MyListingsPageState extends State<MyListingsPage> {
                                   categoryId: listing['category_id'],
                                   title: listing['title'],
                                   description: listing['description'],
-                                  price: (listing['price'] as num).toDouble(),
+                                  price:
+                                      (listing['price'] as num).toDouble(),
                                   imageUrl: listing['image_url'],
                                   status: listing['status'] ?? 'active',
-                                  createdAt: DateTime.parse(listing['created_at']),
-                                  updatedAt: DateTime.parse(listing['updated_at']),
+                                  createdAt: DateTime.parse(
+                                      listing['created_at']),
+                                  updatedAt: DateTime.parse(
+                                      listing['updated_at']),
                                 );
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => BlocProvider.value(
                                       value: context.read<ListingBloc>(),
-                                      child: CreateListingPage(listing: listingEntity),
+                                      child: CreateListingPage(
+                                          listing: listingEntity),
                                     ),
                                   ),
                                 );
@@ -215,6 +226,15 @@ class _MyListingsPageState extends State<MyListingsPage> {
                     },
                   ),
                 ),
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      width: 60,
+      height: 60,
+      color: MetaColors.surfaceSoft,
+      child: const Icon(Icons.image, color: MetaColors.steel),
     );
   }
 }

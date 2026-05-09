@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/design/meta_colors.dart';
+import '../../../../core/design/meta_spacing.dart';
+import '../../../../core/design/meta_typography.dart';
+import '../../../../core/design/widgets/meta_buttons.dart';
+import '../../../../core/design/widgets/meta_inputs.dart';
 import '../controllers/auth_bloc.dart' as auth;
 
 class LoginPage extends StatefulWidget {
@@ -36,6 +41,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
+        leading: const SizedBox.shrink(),
       ),
       body: BlocListener<auth.AuthBloc, auth.AuthState>(
         listener: (context, state) {
@@ -48,25 +54,23 @@ class _LoginPageState extends State<LoginPage> {
           }
         },
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(MetaSpacing.xl),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 48),
+                const SizedBox(height: MetaSpacing.sectionSm),
                 Icon(
                   Icons.shopping_bag_outlined,
                   size: 80,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: MetaColors.primary,
                 ),
-                const SizedBox(height: 32),
-                TextFormField(
+                const SizedBox(height: MetaSpacing.xxl),
+                MetaTextInput(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
+                  labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email_outlined),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -75,24 +79,22 @@ class _LoginPageState extends State<LoginPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: MetaSpacing.base),
+                MetaTextInput(
                   controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
                   obscureText: _obscurePassword,
                   validator: (value) {
@@ -102,23 +104,17 @@ class _LoginPageState extends State<LoginPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: MetaSpacing.xxl),
                 BlocBuilder<auth.AuthBloc, auth.AuthState>(
                   builder: (context, state) {
-                    return ElevatedButton(
-                      onPressed:
-                          state is auth.AuthLoading ? null : () => _onLogin(),
-                      child: state is auth.AuthLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Login'),
+                    return MetaPrimaryButton(
+                      label: 'Login',
+                      isLoading: state is auth.AuthLoading,
+                      onPressed: _onLogin,
                     );
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: MetaSpacing.base),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pushReplacementNamed('/register');

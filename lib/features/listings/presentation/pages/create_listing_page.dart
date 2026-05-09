@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/design/meta_colors.dart';
+import '../../../../core/design/meta_radius.dart';
+import '../../../../core/design/meta_spacing.dart';
+import '../../../../core/design/meta_typography.dart';
+import '../../../../core/design/widgets/meta_buttons.dart';
+import '../../../../core/design/widgets/meta_inputs.dart';
 import '../../../../core/utils/logger.dart';
 import '../../domain/entities/listing.dart';
 import '../controllers/listing_bloc.dart';
@@ -71,7 +77,8 @@ class _CreateListingPageState extends State<CreateListingPage> {
     if (_selectedImage == null) return null;
 
     try {
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${_selectedImage!.path.split('/').last}';
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${_selectedImage!.path.split('/').last}';
       final bytes = await _selectedImage!.readAsBytes();
 
       Logger.api('POST', '/storage/listings/$fileName');
@@ -156,7 +163,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
           }
         },
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(MetaSpacing.xl),
           child: Form(
             key: _formKey,
             child: Column(
@@ -167,13 +174,13 @@ class _CreateListingPageState extends State<CreateListingPage> {
                   child: Container(
                     height: 200,
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[400]!),
+                      color: MetaColors.surfaceSoft,
+                      borderRadius: BorderRadius.circular(MetaRadius.xxl),
+                      border: Border.all(color: MetaColors.hairline),
                     ),
                     child: _selectedImage != null
                         ? ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(MetaRadius.xxl),
                             child: Image.file(
                               _selectedImage!,
                               fit: BoxFit.cover,
@@ -181,7 +188,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
                           )
                         : _existingImageUrl != null
                             ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(MetaRadius.xxl),
                                 child: Image.network(
                                   _existingImageUrl!,
                                   fit: BoxFit.cover,
@@ -191,23 +198,23 @@ class _CreateListingPageState extends State<CreateListingPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.add_a_photo,
-                                      size: 48, color: Colors.grey[600]),
-                                  const SizedBox(height: 8),
+                                      size: 48, color: MetaColors.steel),
+                                  const SizedBox(height: MetaSpacing.xs),
                                   Text(
                                     'Tap to add photo',
-                                    style: TextStyle(color: Colors.grey[600]),
+                                    style: MetaTypography.bodySm.copyWith(
+                                      color: MetaColors.steel,
+                                    ),
                                   ),
                                 ],
                               ),
                   ),
                 ),
-                const SizedBox(height: 24),
-                TextFormField(
+                const SizedBox(height: MetaSpacing.xl),
+                MetaTextInput(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    prefixIcon: Icon(Icons.title),
-                  ),
+                  labelText: 'Title',
+                  prefixIcon: const Icon(Icons.title),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter a title';
@@ -215,7 +222,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: MetaSpacing.base),
                 BlocBuilder<ListingBloc, ListingState>(
                   buildWhen: (previous, current) =>
                       current is CategoriesLoaded || current is ListingLoading,
@@ -224,12 +231,10 @@ class _CreateListingPageState extends State<CreateListingPage> {
                         ? state.categories
                         : <dynamic>[];
 
-                    return DropdownButtonFormField<String>(
+                    return MetaDropdownField(
                       value: _selectedCategoryId,
-                      decoration: const InputDecoration(
-                        labelText: 'Category',
-                        prefixIcon: Icon(Icons.category),
-                      ),
+                      labelText: 'Category',
+                      prefixIcon: const Icon(Icons.category),
                       items: categories.map((cat) {
                         return DropdownMenuItem(
                           value: cat.id as String,
@@ -239,9 +244,6 @@ class _CreateListingPageState extends State<CreateListingPage> {
                       onChanged: (value) {
                         setState(() => _selectedCategoryId = value);
                       },
-                      hint: categories.isEmpty
-                          ? const Text('Loading categories...')
-                          : null,
                       validator: (value) {
                         if (value == null) {
                           return 'Please select a category';
@@ -251,13 +253,11 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     );
                   },
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: MetaSpacing.base),
+                MetaTextInput(
                   controller: _priceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
-                    prefixIcon: Icon(Icons.attach_money),
-                  ),
+                  labelText: 'Price',
+                  prefixIcon: const Icon(Icons.attach_money),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -269,25 +269,18 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: MetaSpacing.base),
+                MetaTextInput(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Description (optional)',
-                    prefixIcon: Icon(Icons.description),
-                  ),
+                  labelText: 'Description (optional)',
+                  prefixIcon: const Icon(Icons.description),
                   maxLines: 4,
                 ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _onSubmit,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(widget.isEditMode ? 'Update Listing' : 'Create Listing'),
+                const SizedBox(height: MetaSpacing.xxl),
+                MetaPrimaryButton(
+                  label: widget.isEditMode ? 'Update Listing' : 'Create Listing',
+                  isLoading: _isLoading,
+                  onPressed: _onSubmit,
                 ),
               ],
             ),

@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/design/meta_colors.dart';
+import '../../../../core/design/meta_spacing.dart';
+import '../../../../core/design/meta_radius.dart';
+import '../../../../core/design/meta_typography.dart';
+import '../../../../core/design/widgets/meta_buttons.dart';
+import '../../../../core/design/widgets/meta_cards.dart';
+import '../../../../core/design/widgets/meta_nav.dart';
 import '../../../auth/presentation/controllers/auth_bloc.dart' as auth;
 import '../controllers/listing_bloc.dart';
 
@@ -54,7 +61,7 @@ class _HomePageState extends State<HomePage> {
                 prefixText: '\$ ',
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: MetaSpacing.md),
             TextField(
               controller: maxController,
               keyboardType: TextInputType.number,
@@ -110,51 +117,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<auth.AuthBloc, auth.AuthState>(
-      builder: (context, state) {
-        final user = state is auth.Authenticated ? state.user : null;
+      builder: (context, authState) {
+        final user = authState is auth.Authenticated ? authState.user : null;
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Baust CampusTrade'),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(56),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: BlocBuilder<ListingBloc, ListingState>(
-                  builder: (context, state) {
-                    final categories = state is CategoriesLoaded ? state.categories : [];
-                    return DropdownButtonHideUnderline(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButton<String>(
-                          value: _selectedCategoryId,
-                          hint: const Text('All Categories'),
-                          isExpanded: true,
-                          items: [
-                            const DropdownMenuItem(
-                              value: null,
-                              child: Text('All Categories'),
-                            ),
-                            ...categories.map((cat) => DropdownMenuItem(
-                              value: cat.id as String,
-                              child: Text(cat.name as String),
-                            )),
-                          ],
-                          onChanged: _onCategorySelected,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
+          appBar: MetaAppBar(
+            title: 'Baust CampusTrade',
+            showBack: false,
             actions: [
-              IconButton(
-                icon: const Icon(Icons.search),
+              MetaIconCircularButton(
+                icon: Icons.search,
                 onPressed: () {
                   showSearch(
                     context: context,
@@ -164,81 +136,69 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              IconButton(
-                icon: Badge(
-                  isLabelVisible: _minPrice != null || _maxPrice != null,
-                  child: const Icon(Icons.filter_list),
-                ),
+              MetaIconCircularButton(
+                icon: Icons.filter_list,
                 onPressed: _showPriceFilterDialog,
               ),
-              IconButton(
-                icon: const Icon(Icons.logout),
+              MetaIconCircularButton(
+                icon: Icons.logout,
                 onPressed: () {
                   context.read<auth.AuthBloc>().add(auth.LogoutEvent());
                   Navigator.of(context).pushReplacementNamed('/login');
                 },
               ),
             ],
-          ),
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                UserAccountsDrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  accountName: Text(user?.name ?? 'User'),
-                  accountEmail: Text(user?.email ?? ''),
-                  currentAccountPicture: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    backgroundImage: user?.avatarUrl != null
-                        ? NetworkImage(user!.avatarUrl!)
-                        : null,
-                    child: user?.avatarUrl == null
-                        ? Text(user?.name.substring(0, 1).toUpperCase() ?? 'U')
-                        : null,
-                  ),
-                  onDetailsPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/profile');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Profile'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/profile');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.inventory_2),
-                  title: const Text('My Listings'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/my-listings');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.message),
-                  title: const Text('Messages'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/conversations');
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.logout),
-                  title: const Text('Logout'),
-                  onTap: () {
-                    context.read<auth.AuthBloc>().add(auth.LogoutEvent());
-                    Navigator.of(context).pushReplacementNamed('/login');
-                  },
-                ),
-              ],
+            bottom: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: MetaSpacing.base, vertical: MetaSpacing.xs),
+              child: BlocBuilder<ListingBloc, ListingState>(
+                builder: (context, state) {
+                  final categories = state is CategoriesLoaded ? state.categories : <dynamic>[];
+                  return SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        MetaPillTab(
+                          label: 'All',
+                          isActive: _selectedCategoryId == null,
+                          onTap: () => _onCategorySelected(null),
+                        ),
+                        const SizedBox(width: MetaSpacing.xs),
+                        ...categories.map((cat) => Padding(
+                          padding: const EdgeInsets.only(right: MetaSpacing.xs),
+                          child: MetaPillTab(
+                            label: cat.name as String,
+                            isActive: _selectedCategoryId == cat.id as String,
+                            onTap: () => _onCategorySelected(cat.id as String),
+                          ),
+                        )),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
+          ),
+          drawer: MetaDrawer(
+            userName: user?.name,
+            userEmail: user?.email,
+            avatarUrl: user?.avatarUrl,
+            onProfileTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/profile');
+            },
+            onMyListingsTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/my-listings');
+            },
+            onMessagesTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/conversations');
+            },
+            onLogoutTap: () {
+              context.read<auth.AuthBloc>().add(auth.LogoutEvent());
+              Navigator.of(context).pushReplacementNamed('/login');
+            },
           ),
           body: BlocBuilder<ListingBloc, ListingState>(
             builder: (context, listingState) {
@@ -253,17 +213,20 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.inventory_2_outlined,
-                            size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
+                            size: 64, color: MetaColors.steel),
+                        const SizedBox(height: MetaSpacing.base),
                         Text(
                           'No listings yet',
-                          style: TextStyle(
-                              fontSize: 18, color: Colors.grey[600]),
+                          style: MetaTypography.headingSm.copyWith(
+                            color: MetaColors.charcoal,
+                          ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: MetaSpacing.xs),
                         Text(
                           'Be the first to post something!',
-                          style: TextStyle(color: Colors.grey[500]),
+                          style: MetaTypography.bodyMd.copyWith(
+                            color: MetaColors.steel,
+                          ),
                         ),
                       ],
                     ),
@@ -275,25 +238,32 @@ class _HomePageState extends State<HomePage> {
                     context.read<ListingBloc>().add(GetListingsEvent());
                   },
                   child: GridView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(MetaSpacing.base),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.7,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
+                      crossAxisSpacing: MetaSpacing.md,
+                      mainAxisSpacing: MetaSpacing.md,
                     ),
                     itemCount: listingState.listings.length,
                     itemBuilder: (context, index) {
                       final listing = listingState.listings[index];
-                      return _ListingCard(
-                        listing: listing,
+                      return MetaListingCard(
+                        imageUrl: listing.imageUrl,
+                        title: listing.title,
+                        price: '\$${listing.price.toStringAsFixed(2)}',
+                        subtitle: listing.categoryId,
                         onTap: () {
                           final authState = context.read<auth.AuthBloc>().state;
                           if (authState is auth.Authenticated) {
-                            Navigator.pushNamed(context, '/listing-detail', arguments: {
-                              'listing': listing,
-                              'currentUser': authState.user,
-                            });
+                            Navigator.pushNamed(
+                              context,
+                              '/listing-detail',
+                              arguments: {
+                                'listing': listing,
+                                'currentUser': authState.user,
+                              },
+                            );
                           }
                         },
                       );
@@ -308,14 +278,15 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.error_outline,
-                          size: 64, color: Colors.red[300]),
-                      const SizedBox(height: 16),
+                          size: 64, color: MetaColors.critical),
+                      const SizedBox(height: MetaSpacing.base),
                       Text(
                         'Failed to load listings',
-                        style: TextStyle(
-                            fontSize: 18, color: Colors.grey[600]),
+                        style: MetaTypography.headingSm.copyWith(
+                          color: MetaColors.charcoal,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: MetaSpacing.xs),
                       TextButton(
                         onPressed: () {
                           context.read<ListingBloc>().add(GetListingsEvent());
@@ -342,95 +313,31 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _ListingCard extends StatelessWidget {
-  final dynamic listing;
-  final VoidCallback? onTap;
-
-  const _ListingCard({required this.listing, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: listing.imageUrl != null
-                        ? Image.network(
-                            listing.imageUrl!,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => Container(
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.image, size: 40),
-                            ),
-                          )
-                        : Container(
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: Icon(Icons.image, size: 40, color: Colors.grey),
-                            ),
-                          ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            listing.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '\$${listing.price.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            listing.categoryId ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-               )         ),
-    );
-  }
-}
-
 class _ListingSearchDelegate extends SearchDelegate<String> {
   final ListingBloc listingBloc;
 
   _ListingSearchDelegate({required this.listingBloc});
 
   @override
+  ThemeData appBarTheme(BuildContext context) {
+    return Theme.of(context).copyWith(
+      appBarTheme: const AppBarTheme(
+        backgroundColor: MetaColors.canvas,
+        foregroundColor: MetaColors.inkDeep,
+        elevation: 0,
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: InputBorder.none,
+        hintStyle: TextStyle(color: MetaColors.steel),
+      ),
+    );
+  }
+
+  @override
   List<Widget> buildActions(BuildContext context) {
     return [
-      IconButton(
-        icon: const Icon(Icons.clear),
+      MetaIconCircularButton(
+        icon: Icons.clear,
         onPressed: () {
           query = '';
         },
@@ -440,8 +347,8 @@ class _ListingSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
+    return MetaIconCircularButton(
+      icon: Icons.arrow_back,
       onPressed: () {
         close(context, '');
         listingBloc.add(GetListingsEvent());
@@ -465,7 +372,8 @@ class _ListingSearchDelegate extends SearchDelegate<String> {
         if (state is ListingsLoaded) {
           if (state.listings.isEmpty) {
             return Center(
-              child: Text('No results for "$query"'),
+              child: Text('No results for "$query"',
+                  style: MetaTypography.bodyMd.copyWith(color: MetaColors.steel)),
             );
           }
 
@@ -474,11 +382,27 @@ class _ListingSearchDelegate extends SearchDelegate<String> {
             itemBuilder: (context, index) {
               final listing = state.listings[index];
               return ListTile(
-                leading: listing.imageUrl != null
-                    ? Image.network(listing.imageUrl!, width: 50, height: 50, fit: BoxFit.cover)
-                    : const Icon(Icons.image),
-                title: Text(listing.title),
-                subtitle: Text('\$${listing.price.toStringAsFixed(2)}'),
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(MetaRadius.lg),
+                  child: listing.imageUrl != null
+                      ? Image.network(
+                          listing.imageUrl!,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          width: 50,
+                          height: 50,
+                          color: MetaColors.surfaceSoft,
+                          child: const Icon(Icons.image, color: MetaColors.steel),
+                        ),
+                ),
+                title: Text(listing.title, style: MetaTypography.bodyMdBold),
+                subtitle: Text(
+                  '\$${listing.price.toStringAsFixed(2)}',
+                  style: MetaTypography.bodySm.copyWith(color: MetaColors.inkDeep),
+                ),
                 onTap: () {
                   close(context, listing.id);
                 },
@@ -497,8 +421,11 @@ class _ListingSearchDelegate extends SearchDelegate<String> {
     if (query.isNotEmpty) {
       return buildResults(context);
     }
-    return const Center(
-      child: Text('Search for listings by title or description'),
+    return Center(
+      child: Text(
+        'Search for listings by title or description',
+        style: MetaTypography.bodyMd.copyWith(color: MetaColors.steel),
+      ),
     );
   }
 }

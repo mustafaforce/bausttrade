@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/design/meta_colors.dart';
+import '../../../../core/design/meta_radius.dart';
+import '../../../../core/design/meta_spacing.dart';
+import '../../../../core/design/meta_typography.dart';
+import '../../../../core/design/widgets/meta_buttons.dart';
+import '../../../../core/design/widgets/meta_cards.dart';
+import '../../../../core/design/widgets/meta_nav.dart';
 import '../../../auth/domain/entities/user.dart';
+import '../../../auth/domain/usecases/get_user_by_id_usecase.dart';
 import '../../../chat/presentation/controllers/chat_bloc.dart';
 import '../../domain/entities/listing.dart';
-import '../../../auth/domain/usecases/get_user_by_id_usecase.dart';
 import '../../../../injection_container.dart';
 
 class ListingDetailPage extends StatelessWidget {
@@ -21,79 +28,75 @@ class ListingDetailPage extends StatelessWidget {
     final isOwner = listing.userId == currentUser.id;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Listing Details'),
+      appBar: MetaAppBar(
+        title: 'Listing Details',
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(MetaSpacing.base),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (listing.imageUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  listing.imageUrl!,
-                  width: double.infinity,
-                  height: 250,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    height: 250,
-                    color: Colors.grey[200],
-                    child: const Center(child: Icon(Icons.image, size: 64)),
-                  ),
-                ),
-              )
-            else
-              Container(
-                width: double.infinity,
-                height: 250,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(child: Icon(Icons.image, size: 64)),
-              ),
-            const SizedBox(height: 20),
+            MetaPhotoCard(
+              child: listing.imageUrl != null
+                  ? Image.network(
+                      listing.imageUrl!,
+                      width: double.infinity,
+                      height: 250,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _imagePlaceholder(),
+                    )
+                  : _imagePlaceholder(),
+            ),
+            const SizedBox(height: MetaSpacing.lg),
             Text(
               listing.title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: MetaTypography.headingSm,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: MetaSpacing.xs),
             Text(
               '\$${listing.price.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 22,
-                color: Colors.green,
-                fontWeight: FontWeight.w600,
+              style: MetaTypography.headingMd.copyWith(
+                color: MetaColors.inkDeep,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: MetaSpacing.base),
             if (listing.description != null && listing.description!.isNotEmpty) ...[
-              const Text(
+              Text(
                 'Description',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: MetaTypography.subtitleLg,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: MetaSpacing.sm),
               Text(
                 listing.description!,
-                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                style: MetaTypography.bodyMd.copyWith(color: MetaColors.charcoal),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: MetaSpacing.base),
             ],
             FutureBuilder<User>(
               future: _fetchSeller(),
               builder: (context, snapshot) {
                 final sellerName = snapshot.data?.name ?? 'Loading...';
-                return Card(
+                return MetaProductFeatureCard(
+                  padding: const EdgeInsets.all(MetaSpacing.base),
                   child: ListTile(
-                    leading: const Icon(Icons.person),
-                    title: const Text('Seller'),
-                    subtitle: Text(isOwner ? 'You' : sellerName),
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: MetaColors.surfaceSoft,
+                      child: Icon(Icons.person,
+                          color: MetaColors.ink),
+                    ),
+                    title: Text('Seller', style: MetaTypography.bodySmBold),
+                    subtitle: Text(
+                      isOwner ? 'You' : sellerName,
+                      style: MetaTypography.bodyMd,
+                    ),
                     trailing: !isOwner
-                        ? const Icon(Icons.chevron_right)
+                        ? const Icon(Icons.chevron_right, color: MetaColors.steel)
                         : null,
-                    onTap: isOwner ? null : () => _contactSeller(context, sellerName),
+                    onTap: isOwner
+                        ? null
+                        : () => _contactSeller(context, sellerName),
                   ),
                 );
               },
@@ -105,19 +108,30 @@ class ListingDetailPage extends StatelessWidget {
           ? null
           : SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: FilledButton.icon(
+                padding: const EdgeInsets.all(MetaSpacing.base),
+                child: MetaBuyCtaButton(
+                  label: 'Contact Seller',
+                  icon: const Icon(Icons.message, size: 18),
                   onPressed: () async {
                     final seller = await _fetchSeller();
                     if (context.mounted) {
                       _contactSeller(context, seller.name);
                     }
                   },
-                  icon: const Icon(Icons.message),
-                  label: const Text('Contact Seller'),
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: 250,
+      color: MetaColors.surfaceSoft,
+      child: const Center(
+        child: Icon(Icons.image, size: 64, color: MetaColors.steel),
+      ),
     );
   }
 

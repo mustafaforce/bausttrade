@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/design/meta_colors.dart';
+import '../../../../core/design/meta_radius.dart';
+import '../../../../core/design/meta_spacing.dart';
+import '../../../../core/design/meta_typography.dart';
+import '../../../../core/design/widgets/meta_nav.dart';
 import '../../../auth/presentation/controllers/auth_bloc.dart' as auth;
 import '../../../listings/domain/entities/listing.dart';
 import '../../domain/entities/message.dart';
@@ -25,6 +30,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final _messageController = TextEditingController();
+  final _scrollController = ScrollController();
   String? _activeConversationId;
   late final ChatBloc _chatBloc;
 
@@ -42,6 +48,7 @@ class _ChatPageState extends State<ChatPage> {
   void dispose() {
     _chatBloc.add(ResetChatEvent());
     _messageController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -61,6 +68,18 @@ class _ChatPageState extends State<ChatPage> {
     _messageController.clear();
   }
 
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<ChatBloc, ChatState>(
@@ -71,13 +90,18 @@ class _ChatPageState extends State<ChatPage> {
         }
         if (state is MessageSent) {
           _chatBloc.add(GetMessagesEvent(_activeConversationId!));
+          _scrollToBottom();
+        }
+        if (state is MessagesLoaded) {
+          _scrollToBottom();
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.sellerName ?? (widget.listing != null
-              ? 'Chat about "${widget.listing!.title}"'
-              : 'Chat')),
+        appBar: MetaAppBar(
+          title: widget.sellerName ??
+              (widget.listing != null
+                  ? 'Chat about "${widget.listing!.title}"'
+                  : 'Chat'),
         ),
         body: Column(
           children: [
@@ -96,10 +120,15 @@ class _ChatPageState extends State<ChatPage> {
                               as auth.Authenticated)
                           .user
                           .id,
+                      scrollController: _scrollController,
                     );
                   }
 
-                  return const Center(child: Text('Start the conversation'));
+                  return Center(
+                    child: Text('Start the conversation',
+                        style: MetaTypography.bodyMd.copyWith(
+                            color: MetaColors.steel)),
+                  );
                 },
               ),
             ),
@@ -117,19 +146,26 @@ class _ChatPageState extends State<ChatPage> {
 class _MessageList extends StatelessWidget {
   final List<Message> messages;
   final String currentUserId;
+  final ScrollController scrollController;
 
-  const _MessageList({required this.messages, required this.currentUserId});
+  const _MessageList({
+    required this.messages,
+    required this.currentUserId,
+    required this.scrollController,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (messages.isEmpty) {
       return const Center(
-        child: Text('No messages yet. Say hello!'),
+        child: Text('No messages yet. Say hello!',
+            style: MetaTypography.bodyMd),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      controller: scrollController,
+      padding: const EdgeInsets.all(MetaSpacing.base),
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final message = messages[index];
@@ -137,15 +173,20 @@ class _MessageList extends StatelessWidget {
         return Align(
           alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            margin: const EdgeInsets.only(bottom: MetaSpacing.xs),
+            padding: const EdgeInsets.symmetric(
+              horizontal: MetaSpacing.base,
+              vertical: MetaSpacing.sm,
+            ),
             decoration: BoxDecoration(
-              color: isMine ? Colors.blue : Colors.grey[300],
-              borderRadius: BorderRadius.circular(20),
+              color: isMine ? MetaColors.primary : MetaColors.surfaceSoft,
+              borderRadius: BorderRadius.circular(MetaRadius.xl),
             ),
             child: Text(
               message.content,
-              style: TextStyle(color: isMine ? Colors.white : Colors.black),
+              style: MetaTypography.bodyMd.copyWith(
+                color: isMine ? MetaColors.canvas : MetaColors.inkDeep,
+              ),
             ),
           ),
         );
@@ -158,17 +199,23 @@ class _MessageInput extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
 
-  const _MessageInput({required this.controller, required this.onSend});
+  const _MessageInput({
+    required this.controller,
+    required this.onSend,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: MetaSpacing.base,
+        vertical: MetaSpacing.xs,
+      ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: MetaColors.canvas,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: MetaColors.inkDeep.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -178,26 +225,39 @@ class _MessageInput extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  hintText: 'Type a message...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: MetaColors.surfaceSoft,
+                  borderRadius: BorderRadius.circular(MetaRadius.full),
                 ),
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSend(),
+                child: TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText: 'Type a message...',
+                    hintStyle: MetaTypography.bodySm.copyWith(
+                        color: MetaColors.steel),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: MetaSpacing.base,
+                      vertical: MetaSpacing.sm,
+                    ),
+                  ),
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => onSend(),
+                  style: MetaTypography.bodyMd,
+                ),
               ),
             ),
-            const SizedBox(width: 8),
-            IconButton.filled(
-              onPressed: onSend,
-              icon: const Icon(Icons.send),
+            const SizedBox(width: MetaSpacing.xs),
+            Container(
+              decoration: const BoxDecoration(
+                color: MetaColors.primary,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                onPressed: onSend,
+                icon: const Icon(Icons.send, color: MetaColors.canvas),
+              ),
             ),
           ],
         ),

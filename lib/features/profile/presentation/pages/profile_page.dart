@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/design/meta_colors.dart';
+import '../../../../core/design/meta_radius.dart';
+import '../../../../core/design/meta_spacing.dart';
+import '../../../../core/design/meta_typography.dart';
+import '../../../../core/design/widgets/meta_buttons.dart';
+import '../../../../core/design/widgets/meta_inputs.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../auth/presentation/controllers/auth_bloc.dart' as auth;
 
@@ -129,7 +135,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: !_isInitialized
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(MetaSpacing.xl),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -140,7 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           children: [
                             CircleAvatar(
                               radius: 60,
-                              backgroundColor: Colors.grey[200],
+                              backgroundColor: MetaColors.surfaceSoft,
                               backgroundImage: _selectedAvatar != null
                                   ? FileImage(_selectedAvatar!)
                                   : _currentAvatarUrl != null
@@ -149,7 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: _selectedAvatar == null &&
                                       _currentAvatarUrl == null
                                   ? Icon(Icons.person,
-                                      size: 60, color: Colors.grey[400])
+                                      size: 60, color: MetaColors.steel)
                                   : null,
                             ),
                             Positioned(
@@ -158,28 +164,27 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: const BoxDecoration(
-                                  color: Colors.green,
+                                  color: MetaColors.inkButton,
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(Icons.camera_alt,
-                                    color: Colors.white, size: 20),
+                                    color: MetaColors.canvas, size: 20),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: MetaSpacing.xs),
                       Text(
                         'Tap to change photo',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        style: MetaTypography.caption.copyWith(
+                            color: MetaColors.steel),
                       ),
-                      const SizedBox(height: 32),
-                      TextFormField(
+                      const SizedBox(height: MetaSpacing.xxl),
+                      MetaTextInput(
                         controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
-                          prefixIcon: Icon(Icons.person_outline),
-                        ),
+                        labelText: 'Name',
+                        prefixIcon: const Icon(Icons.person_outline),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Please enter your name';
@@ -187,29 +192,18 @@ class _ProfilePageState extends State<ProfilePage> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
+                      const SizedBox(height: MetaSpacing.base),
+                      MetaTextInput(
                         controller: _phoneController,
-                        decoration: const InputDecoration(
-                          labelText: 'Phone (optional)',
-                          prefixIcon: Icon(Icons.phone_outlined),
-                        ),
+                        labelText: 'Phone (optional)',
+                        prefixIcon: const Icon(Icons.phone_outlined),
                         keyboardType: TextInputType.phone,
                       ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _onSubmit,
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2),
-                                )
-                              : const Text('Save Changes'),
-                        ),
+                      const SizedBox(height: MetaSpacing.xxl),
+                      MetaPrimaryButton(
+                        label: 'Save Changes',
+                        isLoading: _isLoading,
+                        onPressed: _onSubmit,
                       ),
                     ],
                   ),
