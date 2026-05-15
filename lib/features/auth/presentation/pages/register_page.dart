@@ -54,6 +54,16 @@ class _RegisterPageState extends State<RegisterPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
+          } else if (state is auth.RegistrationSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Account created. Check ${state.email} to verify your email, then log in.',
+                ),
+                duration: const Duration(seconds: 5),
+              ),
+            );
+            Navigator.of(context).pushReplacementNamed('/login');
           } else if (state is auth.Authenticated) {
             Navigator.of(context).pushReplacementNamed('/home');
           }

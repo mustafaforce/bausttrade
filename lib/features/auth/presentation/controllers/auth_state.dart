@@ -22,6 +22,15 @@ class Authenticated extends AuthState {
 
 class Unauthenticated extends AuthState {}
 
+class RegistrationSuccess extends AuthState {
+  final String email;
+
+  const RegistrationSuccess(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}
+
 class AuthError extends AuthState {
   final String message;
 

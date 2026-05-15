@@ -25,17 +25,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    context.read<ListingBloc>().add(GetCategoriesEvent());
     context.read<ListingBloc>().add(GetListingsEvent());
-  }
-
-  void _onCategorySelected(String? categoryId) {
-    setState(() => _selectedCategoryId = categoryId);
-    if (categoryId != null) {
-      context.read<ListingBloc>().add(GetListingsByCategoryEvent(categoryId));
-    } else {
-      context.read<ListingBloc>().add(GetListingsEvent());
-    }
   }
 
   void _showPriceFilterDialog() {
@@ -148,36 +138,6 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ],
-            bottom: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: MetaSpacing.base, vertical: MetaSpacing.xs),
-              child: BlocBuilder<ListingBloc, ListingState>(
-                builder: (context, state) {
-                  final categories = state is CategoriesLoaded ? state.categories : <dynamic>[];
-                  return SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        MetaPillTab(
-                          label: 'All',
-                          isActive: _selectedCategoryId == null,
-                          onTap: () => _onCategorySelected(null),
-                        ),
-                        const SizedBox(width: MetaSpacing.xs),
-                        ...categories.map((cat) => Padding(
-                          padding: const EdgeInsets.only(right: MetaSpacing.xs),
-                          child: MetaPillTab(
-                            label: cat.name as String,
-                            isActive: _selectedCategoryId == cat.id as String,
-                            onTap: () => _onCategorySelected(cat.id as String),
-                          ),
-                        )),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
           ),
           drawer: MetaDrawer(
             userName: user?.name,
@@ -201,31 +161,50 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           body: BlocBuilder<ListingBloc, ListingState>(
+            buildWhen: (previous, current) =>
+                current is ListingLoading ||
+                current is ListingsLoaded ||
+                current is ListingError,
             builder: (context, listingState) {
+              Future<void> refresh() async {
+                context.read<ListingBloc>().add(GetListingsEvent());
+              }
+
               if (listingState is ListingLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
 
               if (listingState is ListingsLoaded) {
                 if (listingState.listings.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  return RefreshIndicator(
+                    onRefresh: refresh,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        Icon(Icons.inventory_2_outlined,
-                            size: 64, color: MetaColors.steel),
-                        const SizedBox(height: MetaSpacing.base),
-                        Text(
-                          'No listings yet',
-                          style: MetaTypography.headingSm.copyWith(
-                            color: MetaColors.charcoal,
-                          ),
-                        ),
-                        const SizedBox(height: MetaSpacing.xs),
-                        Text(
-                          'Be the first to post something!',
-                          style: MetaTypography.bodyMd.copyWith(
-                            color: MetaColors.steel,
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.inventory_2_outlined,
+                                    size: 64, color: MetaColors.steel),
+                                const SizedBox(height: MetaSpacing.base),
+                                Text(
+                                  'No listings yet',
+                                  style: MetaTypography.headingSm.copyWith(
+                                    color: MetaColors.charcoal,
+                                  ),
+                                ),
+                                const SizedBox(height: MetaSpacing.xs),
+                                Text(
+                                  'Be the first to post something!',
+                                  style: MetaTypography.bodyMd.copyWith(
+                                    color: MetaColors.steel,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -234,9 +213,7 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: () async {
-                    context.read<ListingBloc>().add(GetListingsEvent());
-                  },
+                  onRefresh: refresh,
                   child: GridView.builder(
                     padding: const EdgeInsets.all(MetaSpacing.base),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -273,32 +250,41 @@ class _HomePageState extends State<HomePage> {
               }
 
               if (listingState is ListingError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                return RefreshIndicator(
+                  onRefresh: refresh,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     children: [
-                      Icon(Icons.error_outline,
-                          size: 64, color: MetaColors.critical),
-                      const SizedBox(height: MetaSpacing.base),
-                      Text(
-                        'Failed to load listings',
-                        style: MetaTypography.headingSm.copyWith(
-                          color: MetaColors.charcoal,
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline,
+                                  size: 64, color: MetaColors.critical),
+                              const SizedBox(height: MetaSpacing.base),
+                              Text(
+                                'Failed to load listings',
+                                style: MetaTypography.headingSm.copyWith(
+                                  color: MetaColors.charcoal,
+                                ),
+                              ),
+                              const SizedBox(height: MetaSpacing.xs),
+                              TextButton(
+                                onPressed: refresh,
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: MetaSpacing.xs),
-                      TextButton(
-                        onPressed: () {
-                          context.read<ListingBloc>().add(GetListingsEvent());
-                        },
-                        child: const Text('Retry'),
                       ),
                     ],
                   ),
                 );
               }
 
-              return const SizedBox.shrink();
+              return const Center(child: CircularProgressIndicator());
             },
           ),
           floatingActionButton: FloatingActionButton(
@@ -404,7 +390,19 @@ class _ListingSearchDelegate extends SearchDelegate<String> {
                   style: MetaTypography.bodySm.copyWith(color: MetaColors.inkDeep),
                 ),
                 onTap: () {
-                  close(context, listing.id);
+                  final authState =
+                      BlocProvider.of<auth.AuthBloc>(context).state;
+                  final navigator = Navigator.of(context);
+                  close(context, '');
+                  if (authState is auth.Authenticated) {
+                    navigator.pushNamed(
+                      '/listing-detail',
+                      arguments: {
+                        'listing': listing,
+                        'currentUser': authState.user,
+                      },
+                    );
+                  }
                 },
               );
             },

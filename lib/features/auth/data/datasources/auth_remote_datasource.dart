@@ -62,6 +62,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }).select().single();
 
       Logger.success('User registered: ${authResponse.user!.id}');
+
+      await supabaseClient.auth.signOut();
+
       return UserModel.fromJson(userResponse);
     } catch (e, st) {
       Logger.error('Registration failed', error: e, stackTrace: st);

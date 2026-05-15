@@ -155,8 +155,10 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     : 'Listing created successfully!'),
               ),
             );
+            context.read<ListingBloc>().add(GetListingsEvent());
             Navigator.of(context).pop();
           } else if (state is ListingError) {
+            setState(() => _isLoading = false);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );

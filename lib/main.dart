@@ -26,10 +26,8 @@ void main() async {
   final directory = await getApplicationDocumentsDirectory();
   final envFile = File('${directory.path}/.env');
 
-  if (!await envFile.exists()) {
-    final data = await rootBundle.loadString('.env');
-    await envFile.writeAsString(data);
-  }
+  final data = await rootBundle.loadString('.env');
+  await envFile.writeAsString(data);
 
   await SupabaseConstants.load();
 
